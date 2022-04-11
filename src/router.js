@@ -14,20 +14,23 @@ const mockUser = {
 };
 
 const secretKey = "secret";
+const noAccessMessage = 'Invalid login details'
 
-router.post("/login", (req, res) => {
-  const payload = {
-    username: mockUser.username,
-  };
-  const token = jwt.sign(payload, secretKey);
-  res.json({ token });
-});
+router.post('/login', (req, res) => {
+    if (req.body.username && req.body.password) {
+      if (req.body.username === mockUser.username && req.body.password === mockUser.password) {
+        res.status(200).json(jwt.sign({ username: mockUser.username }, secretKey));
+        return
+      }
+    }
+    res.status(401).json(noAccessMessage);
+  });
 
 router.get("/profile", (req, res) => {
   try {
     const token = req.headers.authorization.substring(7);
     jwt.verify(token, secretKey);
-    res.json({ profile: mockUser.profile });
+    res.status(200).json({ profile: mockUser.profile });
   } catch (err) {
     res.status(401).json({ error: "profile not found" });
   }
